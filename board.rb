@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require 'pry-byebug'
-require_relative 'display'
-
 class Board
   include Display
 
@@ -50,6 +47,12 @@ class Board
       row_index -= 1
     end
   end
+
+  def get_node_from_index(node_index)
+    node_column = 65 - node_index[0].ord
+    node_row = 8 - node_index[1].to_i
+    @main_board[node_row][node_column]
+  end
 end
 
 class Node
@@ -64,6 +67,3 @@ class Node
     @down = nil
   end
 end
-
-binding.pry
-bind
