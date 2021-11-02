@@ -23,7 +23,7 @@ module Display
         board_array[temp_row_index][index] = if node.piece == ' '
                                                "#{node.piece}   |"
                                              else
-                                               "#{node.piece.piece_index}   |"
+                                               " #{node.piece.piece_index}  |"
                                              end
       end
       temp_row_index += 1
