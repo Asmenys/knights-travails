@@ -6,8 +6,7 @@ require_relative 'board'
 
 require 'pry-byebug'
 board = Board.new
-board.add_piece('K','D5')
+board.add_piece('K', [4,4])
 binding.pry
-
 
 bind
