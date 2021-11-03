@@ -18,12 +18,12 @@ module Display
   def board_to_array
     board_array = Array.new(8) { Array.new(8) }
     temp_row_index = 0
-    @main_board.each do |row|
+    @board.each do |row|
       row.each_with_index do |node, index|
-        board_array[temp_row_index][index] = if node.piece == ' '
-                                               "#{node.piece}   |"
+        board_array[temp_row_index][index] = if node.nil?
+                                               '    |'
                                              else
-                                               " #{node.piece.piece_index}  |"
+                                               " #{node}  |"
                                              end
       end
       temp_row_index += 1
