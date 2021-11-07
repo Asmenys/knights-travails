@@ -15,10 +15,43 @@ class Node
     @left_up = left_up
     @left_down = left_down
   end
+
+  def pointless?(destination_index)
+    self.destination_index?(destination_index) == false && adjacent_node_values(self).all?(nil)
+  end
+
+  def destination_index?(destination_index)
+    self.value == destination_index
+  end
+
+  def get_adjacent_nodes
+    [
+      self.up_left,
+      self.up_right,
+      self.left_up,
+      self.left_down,
+      self.down_left,
+      self.down_right,
+      self.right_up,
+      self.right_down
+    ]
+  end
+
+  def adjacent_node_values(node)
+    values = []
+    adjacent_nodes = node.get_adjacent_nodes
+    adjacent_nodes.each do |node|
+      values << if node.nil?
+                  nil
+                else
+                  node.value
+                end
+    end
+  end
 end
 
 class Graph
-  attr_accessor :root
+  attr_accessor :root, :array
 
   def initialize(root_index, destination_index)
     @explored_nodes = []
@@ -26,44 +59,14 @@ class Graph
     @root = build_graph(root_index)
   end
 
-  def build_graph_recursive(root_index)
-    if root_index[0] > 7 || (root_index[0]).negative? || root_index[1] > 7 || (root_index[1]).negative?
-      nil
-    elsif root_index == @destination_index
-      Node.new(root_index)
-    else
-      @explored_nodes << root_index
-      value = root_index
-      up_left = [root_index[0] - 2, root_index[1] - 1]
-      up_right = [root_index[0] - 2, root_index[1] + 1]
-      left_up = [root_index[0] - 1, root_index[1] - 2]
-      left_down = [root_index[0] + 1, root_index[1] - 2]
-      down_left = [root_index[0] + 2, root_index[1] - 1]
-      down_right = [root_index[0] + 2, root_index[1] + 1]
-      right_up = [root_index[0] - 1, root_index[1] + 2]
-      right_down = [root_index[0] + 1, root_index[1] + 2]
-      Node.new(value,
-               build_graph(up_left),
-               build_graph(up_right),
-               build_graph(right_up),
-               build_graph(right_down),
-               build_graph(down_right),
-               build_graph(down_left),
-               build_graph(left_up),
-               build_graph(left_down))
-    end
-  end
-
   def build_graph(root_index)
-    solution_found = false
     root = Node.new(root_index)
     queue = [root]
     while queue.empty? == false
       temp_node = queue.shift
-      if solution_found == true || @explored_nodes.include?(temp_node.value) || (temp_node.value[0] || temp_node.value[1]).negative? || temp_node.value[0] > 7 || temp_node.value[1] > 7
+      if @explored_nodes.include?(temp_node.value) || (temp_node.value[0] || temp_node.value[1]).negative? || temp_node.value[0] > 7 || temp_node.value[1] > 7
         nil
       elsif temp_node.value == @destination_index
-        solution_found = true
         Node.new(temp_node)
       else
         temp_arr = [
@@ -85,43 +88,39 @@ class Graph
     root
   end
 
-  # def graph_to_path
-  #   explored_nodes = [@root]
-  #   queue = [@root]
-  #   while queue.empty? == false
-  #     temp_node = queue.shift
-  #   end
-  # end
+  def delete_pointless_leafs(root = @root)
+    root.up_left = nil if root.up_left.pointless?(@destination_index)
+    root.up_right = nil if root.up_right.pointless?(@destination_index)
+    root.left_up = nil if root.left_up.pointless?(@destination_index)
+    root.left_down = nil if root.left_down.pointless?(@destination_index)
+    root.down_left = nil if root.down_left.pointless?(@destination_index)
+    root.down_right = nil if root.down_right.pointless?(@destination_index)
+    root.right_up = nil if root.right_up.pointless?(@destination_index)
+    root.right_down = nil if root.right_down.pointless?(@destination_index)
+  end
 
-  def graph_to_bft
-    explored_nodes = [@root]
+  def path
+    delete_pointless_leafs
+    path = []
     queue = [@root]
     while queue.empty? == false
       temp_node = queue.shift
-      if temp_node == @destination_index
-        temp_node
-      else
-        temp_arr = []
-        temp_arr << temp_node.up_left
-        temp_arr << temp_node.up_right
-        temp_arr << temp_node.right_up
-        temp_arr << temp_node.right_down
-        temp_arr << temp_node.down_right
-        temp_arr << temp_node.down_left
-        temp_arr << temp_node.left_up
-        temp_arr << temp_node.left_down
-        temp_arr = temp_arr.compact
-        temp_arr.each do |node|
-          if explored_nodes.include?(node) == false
-            explored_nodes << node
-            queue << node
-          end
-        end
+      path << temp_node.value
+      adj_nodes = temp_node.get_adjacent_nodes.compact
+      adj_nodes.each do |node|
+        queue << node
       end
     end
+  if path.include?(@destination_index)
+    path
+  else
+    nil
   end
 end
-graph = Graph.new([4, 4], [5, 6])
+end
 
+graph = Graph.new([4, 4], [5, 6])
+graph.delete_pointless_leafs
 binding.pry
+graph.path
 bind
